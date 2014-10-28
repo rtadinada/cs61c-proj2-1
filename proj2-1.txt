@@ -1,0 +1,15 @@
+Partner 1 Name: Ravi Tadinada
+Partner 1 Login: cs61c-al
+
+Partner 2 Name: Neeraj Baid
+Partner 2 Login: cs61c-ap
+
+1. The number of final solutions will grow faster-than-exponentially with the board size. For a 2 x 2 board, the number of end solution states is a mere (2^2 - 1)! = 6, but for a general n x n board, there will (n^2 -1)! possible solutions. For a 5 x 5 board, this is 620 sextillion states, on the scale of number of grains of sand on Earth, a number clearly not possible to deal with in a tree.
+
+
+
+2. Have only three types of entries, the "1" entry, the "-" entry, and a "?". The "1" and the "-" are their normal pieces, while the "?" represents anything else. Since the end result depends only on the end position of the "1", there will now only be (n^2 - 1) winning game states, for each of the positions of the "-" piece. Use these as the solution states, keeping them at level 0 and then proceed normally.
+
+
+
+3. Store the number of pegs instead of the level. In addition, efficiency can be removed by only trying to reduce along the game states of the latest level/number of pieces (because a game board with less pieces cannot match one with more). This would be easier to do by having seperate sets for each level and then reducing based upon that. The space complexity will still be in the number of possible games states, but will be slightly less by a constant factor because there will be less duplicates.
