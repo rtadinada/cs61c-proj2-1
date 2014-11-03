@@ -1,12 +1,12 @@
 from pyspark import SparkContext
-import Sliding, argparse
+import math, Sliding, argparse
 
 def bfs_map(value):
     """ YOUR CODE HERE """
     return_list = [value]
-    children = Sliding.children(WIDTH, HEIGHT, value[0])
+    children = Sliding.children(HEIGHT, WIDTH, Sliding.hash_to_board(WIDTH, HEIGHT, value[0]))
     for child in children:
-        return_list.append((child, value[1]+1))
+        return_list.append((Sliding.board_to_hash(WIDTH, HEIGHT, child), value[1]+1))
     return return_list
 
 def bfs_reduce(value1, value2):
@@ -25,7 +25,7 @@ def solve_sliding_puzzle(master, output, height, width):
 
     # Global constants that will be shared across all map and reduce instances.
     # You can also reference these in any helper functions you write.
-    global HEIGHT, WIDTH, level
+    global HEIGHT, WIDTH, level, prev_len, PARTITION_COUNT
 
     # Initialize global constants
     HEIGHT = height
@@ -34,15 +34,22 @@ def solve_sliding_puzzle(master, output, height, width):
 
     # The solution configuration for this sliding puzzle. You will begin exploring the tree from this node
     sol = Sliding.solution(WIDTH, HEIGHT)
-    level_nodes = sc.parallelize([(sol, 0)])
+    level_nodes = sc.parallelize([(Sliding.board_to_hash(WIDTH, HEIGHT, sol), 0)])
 
+    PARTITION_COUNT = 16
     prev_len = 0
+    count = 0
     while True:
         level_nodes = level_nodes.flatMap(bfs_map).reduceByKey(bfs_reduce)
         next_len = level_nodes.count()
         if next_len == prev_len:
             break
         prev_len = next_len
+
+        count += 1
+        if count == 10:
+            count = 0
+            level_nodes = level_nodes.partitionBy(PARTITION_COUNT)
 
     """ YOUR MAP REDUCE PROCESSING CODE HERE """
     # level = []

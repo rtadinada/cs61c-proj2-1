@@ -28,18 +28,16 @@ def solve_puzzle(master, output, height, width, slaves):
     prev_len = 0
     count = 0
     while True:
-	if count == PARTITION_COUNT:
-	   count = 0
-	   level_nodes = level_nodes.partitionBy(PARTITION_COUNT)
-	else:
-	   count += 1	
         level_nodes = level_nodes.flatMap(bfs_map).reduceByKey(bfs_reduce)
-	
         next_len = level_nodes.count()
         if next_len == prev_len:
             break
         prev_len = next_len
-        level += 2
+
+        count += 1
+        if count == 10:
+            count = 0
+            level_nodes = level_nodes.partitionBy(PARTITION_COUNT)
 
     """ YOUR MAP REDUCE PROCESSING CODE HERE """
     level_nodes = level_nodes.map(lambda x : (x[1], x[0]))
